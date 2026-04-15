@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#e11d48">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="SafeClick - Emergencia en tu bolsillo. Envia alertas SMS con tu ubicacion GPS automaticamente.">
+  <title>SafeClick - App</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/logo.png">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS para mapa -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  
+  <style>
+    :root { --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', system-ui, sans-serif; }
+    body { font-family: var(--font-body); }
+    h1, h2, h3, .logo span { font-family: var(--font-display); }
+    .app-header .app-logo span { font-family: var(--font-display); font-weight: 700; }
+  </style>
+</head>
+<body class="app-body">
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <a href="index.html" class="back-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        <span>Volver</span>
+      </a>
+      <div class="app-logo">
+        <div class="logo-icon small">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <span>SafeClick</span>
+      </div>
+      <div class="sms-indicator">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        SMS
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <!-- Emergency Tab -->
+      <div id="tab-emergency" class="tab-content active">
+        <div class="emergency-container">
+          <div id="no-contacts-warning" class="warning-box" style="display:none;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <p>Agrega contactos para activar el boton de emergencia</p>
+          </div>
+          
+          <div class="sms-info-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>Mensaje con hora, bateria y GPS</span>
+          </div>
+
+          <button id="app-emergency-btn" class="app-emergency-btn pulse-glow" disabled>
+            <svg id="btn-icon-pin" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            <svg id="btn-icon-check" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="display:none;"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+
+          <div class="app-progress-container">
+            <div id="app-progress" class="app-progress-bar"></div>
+          </div>
+
+          <div class="app-status">
+            <p id="app-status-subtitle">Mantene presionado 3 segundos</p>
+            <h3 id="app-status-title">SafeClick Listo</h3>
+          </div>
+
+          <div id="contacts-preview" class="contacts-preview"></div>
+        </div>
+      </div>
+
+      <!-- Contacts Tab -->
+      <div id="tab-contacts" class="tab-content">
+        <div class="contacts-container">
+          <div class="sms-notice">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <p>Los contactos recibiran SMS con tu ubicacion GPS, hora exacta y nivel de bateria cuando actives la emergencia.</p>
+          </div>
+          
+          <div class="contacts-header">
+            <div>
+              <h2>Contactos de Emergencia</h2>
+              <p id="contacts-count">0 contactos guardados</p>
+            </div>
+            <button id="add-contact-btn" class="add-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+
+          <form id="contact-form" class="contact-form" style="display:none;">
+            <div class="form-group">
+              <label><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Nombre</label>
+              <input type="text" id="contact-name" placeholder="Ej: Mama" required>
+            </div>
+            <div class="form-group">
+              <label><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Telefono</label>
+              <input type="tel" id="contact-phone" placeholder="+54 9 11 1234-5678" required>
+            </div>
+            <div class="form-group">
+              <label><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email (opcional)</label>
+              <input type="email" id="contact-email" placeholder="ejemplo@email.com">
+            </div>
+            <div class="form-group">
+              <label><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Relacion</label>
+              <input type="text" id="contact-relationship" placeholder="Familiar, Amigo, etc.">
+            </div>
+            <p id="form-error" class="form-error"></p>
+            <button type="submit" class="submit-btn">Agregar Contacto</button>
+          </form>
+
+          <div id="empty-contacts" class="empty-state" style="display:none;">
+            <div class="empty-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <h3>Sin contactos</h3>
+            <p>Agrega contactos de emergencia para poder enviarles tu ubicacion en caso de peligro.</p>
+          </div>
+
+          <div id="contacts-list" class="contacts-list"></div>
+        </div>
+      </div>
+
+      <!-- Map Tab -->
+      <div id="tab-map" class="tab-content">
+        <div class="map-container">
+          <div class="map-header">
+            <h2>Mapa en Vivo</h2>
+            <p>Visualiza tu ubicacion y el historial de recorrido</p>
+          </div>
+          
+          <div id="live-map"></div>
+          
+          <div class="map-controls">
+            <button class="map-btn" onclick="centerMapOnUser()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+              Mi ubicacion
+            </button>
+            <button class="map-btn" id="toggle-tracking-btn" onclick="toggleTrackingManual()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="M2 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="M12 22v-4"/><path d="m19.07 19.07-2.83-2.83"/><path d="M22 12h-4"/><path d="m19.07 4.93-2.83 2.83"/></svg>
+              Rastreo
+            </button>
+          </div>
+          
+          <div id="tracking-status" class="tracking-status inactive">
+            <span class="tracking-dot"></span>
+            Rastreo inactivo
+          </div>
+          
+          <div class="location-history">
+            <h3>Historial de Ubicaciones</h3>
+            <div id="history-list" class="history-list">
+              <p style="color:var(--fg-muted);text-align:center;padding:1rem;">Sin historial de ubicaciones</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Channels Tab -->
+      <div id="tab-channels" class="tab-content">
+        <div class="channels-container">
+          <div class="channels-header">
+            <h2>Canales de Alerta</h2>
+            <p>Configura como quieres enviar tus alertas de emergencia</p>
+          </div>
+          
+          <div id="channels-list"></div>
+          
+          <button id="enable-push-btn" class="submit-btn" style="display:none;margin-top:1rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Habilitar Notificaciones Push
+          </button>
+        </div>
+      </div>
+
+      <!-- Settings Tab -->
+      <div id="tab-settings" class="tab-content">
+        <div class="settings-container">
+          <h2>Configuracion</h2>
+          <p class="settings-subtitle">Personaliza tu mensaje de emergencia</p>
+
+          <div class="info-box">
+            <h3>Variables disponibles:</h3>
+            <ul>
+              <li><strong>{'{TIME}'}</strong> - Fecha y hora actual</li>
+              <li><strong>{'{BATTERY}'}</strong> - Nivel de bateria del dispositivo</li>
+              <li><strong>{'{LOCATION}'}</strong> - Enlace a Google Maps con tu ubicacion</li>
+            </ul>
+          </div>
+
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <h3>Mensaje de Emergencia</h3>
+            </div>
+            <p class="settings-hint">Este mensaje se enviara automaticamente cuando actives la emergencia.</p>
+            <textarea id="emergency-message" rows="4" placeholder="Escribe tu mensaje..."></textarea>
+            <p class="char-count"><span id="char-count">0</span> caracteres (recomendado: menos de 160)</p>
+            <div class="settings-buttons">
+              <button id="save-message-btn" class="save-btn">Guardar Mensaje</button>
+              <button id="reset-message-btn" class="reset-btn">Restaurar</button>
+            </div>
+          </div>
+
+          <div class="info-box warning">
+            <h3>Informacion importante</h3>
+            <p>SafeClick usa SMS para garantizar que tu mensaje llegue incluso sin conexion a internet. El tracking en tiempo real enviara tu ubicacion cada 10 segundos durante 3 minutos despues de activar la emergencia.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="app-nav">
+      <button class="nav-btn active" data-tab="emergency">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>SOS</span>
+      </button>
+      <button class="nav-btn" data-tab="contacts">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Contactos</span>
+        <span id="contacts-badge" class="nav-badge" style="display:none;">0</span>
+      </button>
+      <button class="nav-btn" data-tab="map">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        <span>Mapa</span>
+      </button>
+      <button class="nav-btn" data-tab="channels">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>Canales</span>
+      </button>
+      <button class="nav-btn" data-tab="settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Config</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Floating SOS Button -->
+  <button id="floating-sos" class="floating-sos" title="Mantene presionado 2 segundos para SOS">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+  </button>
+
+  <!-- PWA Install Banner -->
+  <div id="pwa-banner" class="pwa-banner">
+    <div class="pwa-content">
+      <div class="pwa-info">
+        <h3>Instalar SafeClick</h3>
+        <p>Agrega la app a tu pantalla de inicio para acceso rapido</p>
+      </div>
+      <button id="pwa-install-btn" class="pwa-install-btn">Instalar</button>
+      <button id="pwa-close-btn" class="pwa-close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  
+  <!-- App JS -->
+  <script src="app.js"></script>
+  
+  <script>
+    // Funciones adicionales para el mapa
+    function centerMapOnUser() {
+      if (navigator.geolocation && typeof map !== 'undefined' && map) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+            if (userMarker) {
+              userMarker.setLatLng([pos.coords.latitude, pos.coords.longitude]);
+            }
+          },
+          () => alert('No se pudo obtener tu ubicacion')
+        );
+      }
+    }
+    
+    function toggleTrackingManual() {
+      const btn = document.getElementById('toggle-tracking-btn');
+      if (trackingInterval) {
+        stopTracking();
+        btn.classList.remove('active');
+      } else {
+        startTracking();
+        btn.classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>

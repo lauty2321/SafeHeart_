@@ -1,0 +1,45 @@
+{
+  "name": "SafeClick - Emergencia en tu bolsillo",
+  "short_name": "SafeClick",
+  "description": "Envia alertas SMS con tu ubicacion GPS automaticamente en caso de emergencia",
+  "start_url": "/app.html",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#e11d48",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["safety", "utilities"],
+  "screenshots": [
+    {
+      "src": "/screenshot1.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Pantalla de emergencia"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Activar SOS",
+      "short_name": "SOS",
+      "description": "Activa la alerta de emergencia",
+      "url": "/app.html?action=sos",
+      "icons": [{ "src": "/logo-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

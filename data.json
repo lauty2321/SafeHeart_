@@ -1,0 +1,64 @@
+{
+  "app": {
+    "name": "SafeClick",
+    "version": "2.0.0",
+    "description": "Emergencia en tu bolsillo - SMS automatico con tracking en tiempo real"
+  },
+  "defaultMessage": "EMERGENCIA! Necesito ayuda urgente. Hora: {TIME} | Bateria: {BATTERY}% | Ubicacion: {LOCATION}",
+  "smsConfig": {
+    "maxLength": 160,
+    "encoding": "UTF-8",
+    "locationPlaceholder": "{LOCATION}",
+    "timePlaceholder": "{TIME}",
+    "batteryPlaceholder": "{BATTERY}"
+  },
+  "trackingConfig": {
+    "intervalSeconds": 10,
+    "durationMinutes": 3,
+    "maxPoints": 50
+  },
+  "features": {
+    "sms": true,
+    "whatsapp": true,
+    "email": true,
+    "push": true,
+    "gps": true,
+    "tracking": true,
+    "vibration": true,
+    "sound": true
+  },
+  "alertChannels": {
+    "sms": {
+      "enabled": true,
+      "description": "Mensaje de texto directo",
+      "requiresInternet": false
+    },
+    "whatsapp": {
+      "enabled": true,
+      "description": "Mensaje via WhatsApp Web",
+      "requiresInternet": true
+    },
+    "email": {
+      "enabled": true,
+      "description": "Correo electronico de emergencia",
+      "requiresInternet": true
+    },
+    "push": {
+      "enabled": true,
+      "description": "Notificacion push en navegador",
+      "requiresInternet": false
+    }
+  },
+  "exampleContacts": [
+    { "id": "1", "name": "Mama", "phone": "+5491112345678", "email": "mama@email.com", "relationship": "Familiar" },
+    { "id": "2", "name": "Papa", "phone": "+5491187654321", "email": "papa@email.com", "relationship": "Familiar" },
+    { "id": "3", "name": "Hermano", "phone": "+5491155551234", "relationship": "Familiar" }
+  ],
+  "stats": {
+    "activationTime": "3s",
+    "trackingDuration": "3min",
+    "trackingInterval": "10s",
+    "method": "SMS + Multicanal",
+    "buttons": 1
+  }
+}
