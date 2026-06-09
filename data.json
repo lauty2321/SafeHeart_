@@ -1,16 +1,17 @@
 {
   "app": {
-    "name": "SafeClick",
+    "name": "SafeHeart",
     "version": "2.0.0",
-    "description": "Emergencia en tu bolsillo - SMS automatico con tracking en tiempo real"
+    "description": "Emergencia para adultos mayores - SMS automático con ubicación GPS y pulsaciones cardíacas"
   },
-  "defaultMessage": "EMERGENCIA! Necesito ayuda urgente. Hora: {TIME} | Bateria: {BATTERY}% | Ubicacion: {LOCATION}",
+  "defaultMessage": "EMERGENCIA! Adulto mayor necesita ayuda urgente. Hora: {TIME} | Pulsaciones: {BPM} bpm | Bateria: {BATTERY}% | Ubicacion: {LOCATION}",
   "smsConfig": {
     "maxLength": 160,
     "encoding": "UTF-8",
     "locationPlaceholder": "{LOCATION}",
     "timePlaceholder": "{TIME}",
-    "batteryPlaceholder": "{BATTERY}"
+    "batteryPlaceholder": "{BATTERY}",
+    "bpmPlaceholder": "{BPM}"
   },
   "trackingConfig": {
     "intervalSeconds": 10,
@@ -25,12 +26,13 @@
     "gps": true,
     "tracking": true,
     "vibration": true,
-    "sound": true
+    "sound": true,
+    "heartRate": true
   },
   "alertChannels": {
     "sms": {
       "enabled": true,
-      "description": "Mensaje de texto directo",
+      "description": "Mensaje de texto directo - funciona sin internet",
       "requiresInternet": false
     },
     "whatsapp": {
@@ -50,15 +52,32 @@
     }
   },
   "exampleContacts": [
-    { "id": "1", "name": "Mama", "phone": "+5491112345678", "email": "mama@email.com", "relationship": "Familiar" },
-    { "id": "2", "name": "Papa", "phone": "+5491187654321", "email": "papa@email.com", "relationship": "Familiar" },
-    { "id": "3", "name": "Hermano", "phone": "+5491155551234", "relationship": "Familiar" }
+    {
+      "id": "1",
+      "name": "Hijo/a",
+      "phone": "+5491112345678",
+      "email": "hijo@email.com",
+      "relationship": "Familiar"
+    },
+    {
+      "id": "2",
+      "name": "Enfermero/a",
+      "phone": "+5491187654321",
+      "email": "enfermero@email.com",
+      "relationship": "Cuidador"
+    },
+    {
+      "id": "3",
+      "name": "Médico",
+      "phone": "+5491155551234",
+      "relationship": "Médico"
+    }
   ],
   "stats": {
     "activationTime": "3s",
     "trackingDuration": "3min",
     "trackingInterval": "10s",
-    "method": "SMS + Multicanal",
+    "method": "SMS + Monitor Cardíaco",
     "buttons": 1
   }
 }

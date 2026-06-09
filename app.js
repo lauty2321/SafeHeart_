@@ -1,11 +1,11 @@
-// ========== SAFECLICK APP - MEJORAS AVANZADAS ==========
+// ========== SAFEHEART APP - EMERGENCIAS ADULTOS MAYORES ==========
 
 // Constantes de almacenamiento
-const STORAGE_KEY = 'safeclick_contacts';
-const MESSAGE_KEY = 'safeclick_message';
-const CHANNELS_KEY = 'safeclick_channels';
-const TRACKING_KEY = 'safeclick_tracking';
-const DEFAULT_MESSAGE = 'EMERGENCIA! Necesito ayuda urgente. Hora: {TIME} | Bateria: {BATTERY}% | Ubicacion: {LOCATION}';
+const STORAGE_KEY = 'safeheart_contacts';
+const MESSAGE_KEY = 'safeheart_message';
+const CHANNELS_KEY = 'safeheart_channels';
+const TRACKING_KEY = 'safeheart_tracking';
+const DEFAULT_MESSAGE = 'EMERGENCIA! Adulto mayor necesita ayuda urgente. Hora: {TIME} | Pulsaciones: {BPM} bpm | Bateria: {BATTERY}% | Ubicacion: {LOCATION}';
 
 // Estado de la aplicacion
 let contacts = [];
@@ -91,10 +91,15 @@ async function buildSmartMessage(location) {
     locationInfo = mapsUrl;
   }
   
+  // Obtener BPM simulado (en hardware real vendría del sensor)
+  const bpmEl = document.getElementById('app-bpm-value');
+  const bpmValue = bpmEl ? bpmEl.textContent : '72';
+  
   // Reemplazar placeholders en el mensaje
   let message = emergencyMessage
     .replace('{TIME}', timeStr)
     .replace('{BATTERY}', batteryLevel)
+    .replace('{BPM}', bpmValue)
     .replace('{LOCATION}', locationInfo);
   
   return { message, mapsUrl, timeStr, batteryLevel };
@@ -209,7 +214,7 @@ function initMap() {
           .openPopup();
         
         // Inicializar path de tracking
-        trackingPath = L.polyline([], { color: '#e11d48', weight: 3 }).addTo(map);
+        trackingPath = L.polyline([], { color: '#7c3aed', weight: 3 }).addTo(map);
       },
       () => {
         console.log('No se pudo obtener ubicacion inicial');
@@ -387,7 +392,7 @@ async function sendEmailAlert(smartMessage) {
 
 async function sendPushNotification() {
   if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification('SafeClick - EMERGENCIA', {
+    new Notification('SafeHeart - EMERGENCIA', {
       body: 'Se ha activado una alerta de emergencia',
       icon: '/logo.png',
       badge: '/logo.png',
@@ -667,7 +672,7 @@ function appReset() {
     progressBar.classList.remove('success');
   }
   if (statusTitle) {
-    statusTitle.textContent = 'SafeClick Listo';
+    statusTitle.textContent = 'SafeHeart Listo';
     statusTitle.classList.remove('success');
   }
   if (statusSubtitle) statusSubtitle.textContent = 'Mantene presionado 3 segundos';
@@ -795,7 +800,7 @@ function renderSettings() {
         .replace('{TIME}', '15/04/2026, 14:30')
         .replace('{BATTERY}', '75');
       charCount.textContent = sampleMsg.length;
-      charCount.style.color = sampleMsg.length > 160 ? '#e11d48' : '#888';
+      charCount.style.color = sampleMsg.length > 160 ? '#7c3aed' : '#888';
     }
   }
   
@@ -929,7 +934,7 @@ function resetDemo() {
   
   if (btn) btn.classList.remove('active');
   if (progressBar) progressBar.style.width = '0%';
-  if (statusTitle) { statusTitle.textContent = 'SafeClick Listo'; statusTitle.classList.remove('success'); }
+  if (statusTitle) { statusTitle.textContent = 'SafeHeart Listo'; statusTitle.classList.remove('success'); }
   if (statusSubtitle) statusSubtitle.textContent = 'Mantene presionado para probar';
   
   ['card-location', 'card-sms', 'card-alert'].forEach(id => {
