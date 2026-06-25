@@ -14,9 +14,6 @@
 
 <div id="scroll-bar"></div>
 
-
-
-
 <nav id="navbar">
   <div class="nav-inner">
     <div class="nav-left">
@@ -526,49 +523,118 @@ setInterval(() => {
   if (el) el.textContent = bpm;
 }, 2000);
 
-// ── SOS hold logic ──
-let holdInterval = null, progressVal = 0, sosTriggered = false;
+// ── 🚨 BOTÓN DE EMERGENCIA (SafeHeart) ──
+const emergencyBtn = document.getElementById('emergency-btn');
+let holdInterval = null;
+let progressVal = 0;
+let sosTriggered = false;
+
+function triggerSOS() {
+  if (sosTriggered) return;
+  sosTriggered = true;
+
+  const statusSub = document.getElementById('status-subtitle');
+  const progressEl = document.getElementById('progress');
+
+  if (statusSub) statusSub.textContent = '🚨 ¡EMERGENCIA ACTIVADA!';
+  if (emergencyBtn) emergencyBtn.classList.add('active');
+
+  setTimeout(() => { document.getElementById('fc-loc').classList.add('show'); }, 300);
+  setTimeout(() => { document.getElementById('fc-sms').classList.add('show'); }, 800);
+  setTimeout(() => { document.getElementById('fc-alrt').classList.add('show'); }, 1300);
+
+  enviarWhatsApp(-34.6037, -58.3816);
+
+  setTimeout(() => {
+    sosTriggered = false;
+    if (emergencyBtn) emergencyBtn.classList.remove('active');
+    ['fc-loc','fc-sms','fc-alrt'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('show');
+    });
+    if (progressEl) progressEl.style.width = '0%';
+    if (statusSub) statusSub.textContent = 'Mantené presionado para probar';
+    progressVal = 0;
+  }, 5000);
+}
 
 function startHold(e) {
   if (e) e.preventDefault();
   if (sosTriggered) return;
   progressVal = 0;
-  document.getElementById('status-subtitle').textContent = 'Soltá para cancelar…';
+  const statusSub = document.getElementById('status-subtitle');
+  const progressEl = document.getElementById('progress');
+  if (statusSub) statusSub.textContent = 'Soltá para cancelar…';
+  if (holdInterval) clearInterval(holdInterval);
   holdInterval = setInterval(() => {
     progressVal = Math.min(progressVal + 100/30, 100);
-    document.getElementById('progress').style.width = progressVal + '%';
-    if (progressVal >= 100) { clearInterval(holdInterval); triggerSOS(); }
+    if (progressEl) progressEl.style.width = progressVal + '%';
+    if (progressVal >= 100) {
+      clearInterval(holdInterval);
+      holdInterval = null;
+      triggerSOS();
+    }
   }, 100);
 }
+
 function cancelHold() {
   if (sosTriggered) return;
   clearInterval(holdInterval);
+  holdInterval = null;
   progressVal = 0;
-  document.getElementById('progress').style.width = '0%';
-  document.getElementById('status-subtitle').textContent = 'Mantené presionado para probar';
-}
-function triggerSOS() {
-  sosTriggered = true;
-  document.getElementById('emergency-btn').classList.add('active');
-  document.getElementById('status-subtitle').textContent = '✅ Emergencia activada — Demo';
-  setTimeout(() => { document.getElementById('fc-loc').classList.add('show'); }, 300);
-  setTimeout(() => { document.getElementById('fc-sms').classList.add('show'); }, 800);
-  setTimeout(() => { document.getElementById('fc-alrt').classList.add('show'); }, 1300);
-  setTimeout(() => {
-    sosTriggered = false;
-    document.getElementById('emergency-btn').classList.remove('active');
-    ['fc-loc','fc-sms','fc-alrt'].forEach(id => document.getElementById(id).classList.remove('show'));
-    document.getElementById('progress').style.width = '0%';
-    document.getElementById('status-subtitle').textContent = 'Mantené presionado para probar';
-  }, 5000);
+  const progressEl = document.getElementById('progress');
+  const statusSub = document.getElementById('status-subtitle');
+  if (progressEl) progressEl.style.width = '0%';
+  if (statusSub) statusSub.textContent = 'Mantené presionado para probar';
 }
 
-// ── Show floating cards after load ──
-setTimeout(() => {
-  ['fc-loc','fc-sms','fc-alrt'].forEach((id,i) => {
-    setTimeout(() => { const el = document.getElementById(id); if(el) el.classList.add('show'); }, i*500);
+if (emergencyBtn) {
+  emergencyBtn.addEventListener('mousedown', (e) => {
+    if (e.button === 0) startHold(e);
   });
-}, 2000);
+  emergencyBtn.addEventListener('mouseup', (e) => {
+    if (e.button === 0) cancelHold();
+  });
+  emergencyBtn.addEventListener('mouseleave', cancelHold);
+  emergencyBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startHold(e);
+  });
+  emergencyBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    cancelHold();
+  });
+  emergencyBtn.addEventListener('touchcancel', cancelHold);
+}
+
+// ── 🖱️ ATAJO CON LA RUEDITA (CLIC MEDIO) EN CUALQUIER LUGAR ──
+document.addEventListener('mousedown', function(e) {
+  if (e.button === 1) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (sosTriggered) return;
+    if (emergencyBtn && (e.target === emergencyBtn || emergencyBtn.contains(e.target))) {
+      if (holdInterval) cancelHold();
+    }
+    triggerSOS(); // Activa al instante
+  }
+});
+
+document.addEventListener('auxclick', function(e) {
+  if (e.button === 1) {
+    e.preventDefault();
+  }
+});
+
+let yaEnviado = false;
+function enviarWhatsApp(lat, lon) {
+  if (yaEnviado) return;
+  yaEnviado = true;
+  const numero = "5491161604379";
+  const msg = "🚨 Emergencia SafeHeart\nMi ubicación actual:\nhttps://maps.google.com/?q=" + lat + "," + lon;
+  window.open("https://api.whatsapp.com/send?phone=" + numero + "&text=" + encodeURIComponent(msg), '_blank');
+  setTimeout(() => { yaEnviado = false; }, 10000);
+}
 
 // ── FAQ accordion ──
 document.querySelectorAll('.faq-question').forEach(btn => {
@@ -579,15 +645,14 @@ document.querySelectorAll('.faq-question').forEach(btn => {
   });
 });
 
-// ── WhatsApp emergency (original) ──
-let yaEnviado = false;
-function enviarWhatsApp(lat, lon) {
-  if (yaEnviado) return;
-  yaEnviado = true;
-  const numero = "5491161604379";
-  const msg = "🚨 Emergencia SafeHeart\nhttps://maps.google.com/?q=" + lat + "," + lon;
-  window.location.replace("https://api.whatsapp.com/send?phone=" + numero + "&text=" + encodeURIComponent(msg));
-}
+// ── Mostrar tarjetas flotantes al cargar ──
+setTimeout(() => {
+  ['fc-loc','fc-sms','fc-alrt'].forEach((id,i) => {
+    setTimeout(() => { const el = document.getElementById(id); if(el) el.classList.add('show'); }, i*500);
+  });
+}, 2000);
+
+console.log('✅ SafeHeart: Ruedita (clic medio) = SOS instantáneo en toda la página.');
 </script>
 </body>
 </html>
