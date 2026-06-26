@@ -471,7 +471,7 @@ function startHoldGeneric() {
   progressVal = 0;
   if (progressEl) progressEl.style.width = '0%';
   if (statusSub) statusSub.textContent = 'Soltá para cancelar…';
-  console.log('⏳ Iniciando cuenta regresiva (3s)');
+  console.log('⏳ Iniciando cuenta regresiva (1s)');
 
   holdInterval = setInterval(() => {
     progressVal = Math.min(progressVal + 100/30, 100);
