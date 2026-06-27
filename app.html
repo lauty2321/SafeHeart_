@@ -302,7 +302,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="app.js"></script>
-  <script>
+<script>
 // ── Reloj en app ──
 function updateAppWatch() {
   const now = new Date();
@@ -416,29 +416,31 @@ const counterObs = new IntersectionObserver((entries) => {
 }, { threshold: 0.5 });
 document.querySelectorAll('.stat-num[data-target]').forEach(el => counterObs.observe(el));
 
-// ── 🚨 BOTÓN DE EMERGENCIA (con tus IDs) ──
+// ── 🚨 BOTÓN DE EMERGENCIA ──
 const emergencyBtn = document.getElementById('app-emergency-btn');
 const progressEl = document.getElementById('app-progress');
 const statusSub = document.getElementById('app-status-subtitle');
+
+console.log('🔍 Elementos encontrados:', { emergencyBtn, progressEl, statusSub });
 
 let holdInterval = null;
 let progressVal = 0;
 let sosTriggered = false;
 
 function triggerSOS() {
-  if (sosTriggered) return;
+  console.log('🚨 ¡triggerSOS() ejecutada!');
+  if (sosTriggered) {
+    console.log('⛔ SOS ya activado, ignorando.');
+    return;
+  }
   sosTriggered = true;
 
-  // Cambiar texto de estado
   if (statusSub) {
     statusSub.textContent = '🚨 ¡EMERGENCIA ACTIVADA!';
     statusSub.style.color = 'var(--green)';
   }
 
-  // NO cambiamos el fondo del botón a verde, solo lo dejamos como está
-  // y tampoco mostramos tilde (check) – solo el corazón sigue visible.
-
-  // Mostrar tarjetas flotantes (si existen)
+  // Mostrar tarjetas flotantes
   const fcLoc = document.getElementById('fc-loc');
   const fcSms = document.getElementById('fc-sms');
   const fcAlrt = document.getElementById('fc-alrt');
@@ -446,11 +448,13 @@ function triggerSOS() {
   if (fcSms) setTimeout(() => fcSms.classList.add('show'), 800);
   if (fcAlrt) setTimeout(() => fcAlrt.classList.add('show'), 1300);
 
-  // Enviar WhatsApp
-  enviarWhatsApp(-34.6037, -58.3816);
+  // ─── 📨 Enviar a ntfy.sh ───
+  console.log('📨 Llamando a enviarNtfy con coordenadas fijas...');
+  enviarNtfy(-34.6037, -58.3816);
 
   // Resetear después de 5 segundos
   setTimeout(() => {
+    console.log('🔄 Reseteando estado de SOS...');
     sosTriggered = false;
     if (progressEl) progressEl.style.width = '0%';
     if (statusSub) {
@@ -464,14 +468,21 @@ function triggerSOS() {
   }, 5000);
 }
 
-// Función para iniciar la presión (usada por izquierdo y medio)
+// ── Función para iniciar la presión ──
 function startHoldGeneric() {
-  if (sosTriggered) return;
-  if (holdInterval) clearInterval(holdInterval);
+  console.log('⏳ startHoldGeneric() llamada');
+  if (sosTriggered) {
+    console.log('⛔ SOS ya activado, no inicio cuenta.');
+    return;
+  }
+  if (holdInterval) {
+    console.log('⛔ Ya hay un intervalo activo, limpiando...');
+    clearInterval(holdInterval);
+  }
   progressVal = 0;
   if (progressEl) progressEl.style.width = '0%';
   if (statusSub) statusSub.textContent = 'Soltá para cancelar…';
-  console.log('⏳ Iniciando cuenta regresiva (1s)');
+  console.log('⏳ Iniciando cuenta regresiva (3 segundos)');
 
   holdInterval = setInterval(() => {
     progressVal = Math.min(progressVal + 100/30, 100);
@@ -482,14 +493,18 @@ function startHoldGeneric() {
     if (progressVal >= 100) {
       clearInterval(holdInterval);
       holdInterval = null;
-      console.log('✅ ¡Tiempo completado! Activando SOS...');
+      console.log('✅ ¡Tiempo completado! Llamando a triggerSOS()...');
       triggerSOS();
     }
   }, 100);
 }
 
 function cancelHoldGeneric() {
-  if (sosTriggered) return;
+  console.log('🔄 cancelHoldGeneric() llamada');
+  if (sosTriggered) {
+    console.log('⛔ SOS activado, no cancelo.');
+    return;
+  }
   clearInterval(holdInterval);
   holdInterval = null;
   progressVal = 0;
@@ -498,34 +513,50 @@ function cancelHoldGeneric() {
   console.log('🔄 Presión cancelada');
 }
 
-// ── Eventos para clic IZQUIERDO en el botón ──
+// ── Eventos clic izquierdo y táctil ──
 if (emergencyBtn) {
+  console.log('🔘 Configurando eventos del botón de emergencia');
   emergencyBtn.addEventListener('mousedown', (e) => {
     if (e.button === 0) {
       e.preventDefault();
+      console.log('🖱️ mousedown (izquierdo)');
       startHoldGeneric();
     }
   });
   emergencyBtn.addEventListener('mouseup', (e) => {
-    if (e.button === 0) cancelHoldGeneric();
+    if (e.button === 0) {
+      console.log('🖱️ mouseup (izquierdo)');
+      cancelHoldGeneric();
+    }
   });
-  emergencyBtn.addEventListener('mouseleave', cancelHoldGeneric);
+  emergencyBtn.addEventListener('mouseleave', () => {
+    console.log('🖱️ mouseleave');
+    cancelHoldGeneric();
+  });
   emergencyBtn.addEventListener('touchstart', (e) => {
     e.preventDefault();
+    console.log('📱 touchstart');
     startHoldGeneric();
   });
   emergencyBtn.addEventListener('touchend', (e) => {
     e.preventDefault();
+    console.log('📱 touchend');
     cancelHoldGeneric();
   });
-  emergencyBtn.addEventListener('touchcancel', cancelHoldGeneric);
+  emergencyBtn.addEventListener('touchcancel', () => {
+    console.log('📱 touchcancel');
+    cancelHoldGeneric();
+  });
+} else {
+  console.error('❌ No se encontró el botón #app-emergency-btn');
 }
 
-// ── 🖱️ ATAJO CON LA RUEDITA (clic medio) EN CUALQUIER LUGAR ──
+// ── ATAJO CON LA RUEDITA (clic medio) ──
 document.addEventListener('mousedown', (e) => {
   if (e.button === 1) {
     e.preventDefault();
     e.stopPropagation();
+    console.log('🖱️ clic medio (ruedita)');
     if (holdInterval) cancelHoldGeneric();
     startHoldGeneric();
   }
@@ -533,30 +564,80 @@ document.addEventListener('mousedown', (e) => {
 
 document.addEventListener('mouseup', (e) => {
   if (e.button === 1) {
+    console.log('🖱️ mouseup (medio)');
     cancelHoldGeneric();
   }
 });
 
 document.addEventListener('mouseleave', () => {
-  if (holdInterval) cancelHoldGeneric();
+  if (holdInterval) {
+    console.log('🖱️ mouseleave global');
+    cancelHoldGeneric();
+  }
 });
 
 document.addEventListener('auxclick', (e) => {
   if (e.button === 1) e.preventDefault();
 });
 
-// ── Envío de WhatsApp ──
+// ── 📨 ENVÍO A NTFY.SH (con logs) ──
 let yaEnviado = false;
-function enviarWhatsApp(lat, lon) {
+
+function enviarNtfy(lat, lon) {
   if (yaEnviado) return;
   yaEnviado = true;
-  const numero = "5491161604379";
-  const msg = "🚨 Emergencia SafeHeart\nMi ubicación actual:\nhttps://maps.google.com/?q=" + lat + "," + lon;
-  window.open("https://api.whatsapp.com/send?phone=" + numero + "&text=" + encodeURIComponent(msg), '_blank');
-  setTimeout(() => { yaEnviado = false; }, 10000);
+
+  // ✏️ MODIFICÁ ACÁ EL TEXTO QUE QUERÉS QUE APAREZCA EN LA NOTIFICACIÓN
+  const mensajePersonalizado = "🚨 ¡EMERGENCIA! Necesito ayuda urgente. Por favor, contacten a mis emergencias.";
+
+  const mensajeCompleto = 
+    mensajePersonalizado + "\n" +
+    "Mi ubicación actual:\n" +
+    "https://maps.google.com/?q=" + lat + "," + lon;
+
+  // Los headers NO deben tener emojis ni caracteres especiales
+  fetch('https://ntfy.sh/SafeHeart', {
+    method: 'POST',
+    headers: {
+      'Title': 'SOS SafeHeart',  // ✅ sin emoji
+      'Priority': 'urgent',
+      'Tags': 'warning,red_circle,ambulance'  // ⚠️ 'red_circle' y 'ambulance' son tags válidos, pero no contienen emoji
+    },
+    body: mensajeCompleto  // ✅ acá podés poner todos los emojis que quieras
+  })
+  .then(response => {
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    console.log('✅ Notificación enviada a ntfy.sh');
+    return response.json();
+  })
+  .catch(error => {
+    console.error('❌ Error al enviar a ntfy:', error);
+  })
+  .finally(() => {
+    setTimeout(() => { yaEnviado = false; }, 10000);
+  });
 }
 
-// ── FAQ accordion (si existe) ──
+// ── Función de prueba (desde consola o botón) ──
+function testNtfy() {
+  console.log('🧪 Ejecutando testNtfy()');
+  fetch('https://ntfy.sh/SafeHeart', {
+    method: 'POST',
+    headers: { 'Title': 'Test', 'Priority': 'default' },
+    body: 'Mensaje de prueba desde el navegador.'
+  })
+  .then(r => r.json())
+  .then(data => {
+    console.log('✅ Prueba exitosa:', data);
+    alert('✅ Notificación de prueba enviada. Revisá si te llega.');
+  })
+  .catch(err => {
+    console.error('❌ Error en prueba:', err);
+    alert('❌ Error: ' + err.message);
+  });
+}
+
+// ── FAQ accordion ──
 document.querySelectorAll('.faq-question').forEach(btn => {
   btn.addEventListener('click', () => {
     const item = btn.parentElement;
@@ -565,7 +646,7 @@ document.querySelectorAll('.faq-question').forEach(btn => {
   });
 });
 
-// ── Mostrar tarjetas flotantes al cargar (solo si existen) ──
+// ── Mostrar tarjetas flotantes al cargar ──
 setTimeout(() => {
   ['fc-loc','fc-sms','fc-alrt'].forEach((id,i) => {
     setTimeout(() => { 
@@ -575,7 +656,7 @@ setTimeout(() => {
   });
 }, 2000);
 
-console.log('✅ SafeHeart: Ruedita y clic izquierdo con barra de progreso (sin tilde verde).');
+console.log('✅ SafeHeart: Código cargado. Esperando interacción...');
 </script>
 </body>
 </html>

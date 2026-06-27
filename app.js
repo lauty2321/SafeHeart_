@@ -327,7 +327,36 @@ function toggleChannel(channel) {
   renderChannels();
 }
 
-// ========== ENVIO DE ALERTAS MULTICANAL ==========
+// ========== 🆕 ENVÍO A NTFY.SH ==========
+function sendNtfyAlert(message, location) {
+  // Preparamos el mensaje con la ubicación si existe
+  let ubicacionTexto = 'Ubicación no disponible';
+  if (location && location.lat && location.lon) {
+    ubicacionTexto = `https://maps.google.com/?q=${location.lat},${location.lon}`;
+  }
+  
+  const mensajeCompleto = message + '\n\n📍 ' + ubicacionTexto;
+
+  return fetch('https://ntfy.sh/SafeHeart', {
+    method: 'POST',
+    headers: {
+      'Title': '🚨 EMERGENCIA SafeHeart',
+      'Priority': 'urgent',
+      'Tags': 'warning,red_circle,ambulance'
+    },
+    body: mensajeCompleto
+  })
+  .then(response => {
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    console.log('✅ Notificación enviada a ntfy.sh');
+    return response.json();
+  })
+  .catch(error => {
+    console.error('❌ Error al enviar a ntfy:', error);
+  });
+}
+
+// ========== ENVIO DE ALERTAS MULTICANAL (modificado) ==========
 async function sendMultiChannelAlert(location, smartMessage) {
   const promises = [];
   
@@ -350,6 +379,9 @@ async function sendMultiChannelAlert(location, smartMessage) {
   if (alertChannels.push) {
     promises.push(sendPushNotification());
   }
+
+  // ─── 🆕 SIEMPRE ENVIAR A NTFY.SH ───
+  promises.push(sendNtfyAlert(smartMessage.message, location));
   
   await Promise.allSettled(promises);
 }
@@ -595,7 +627,7 @@ async function activateEmergency() {
     
     if (statusTitle) statusTitle.textContent = 'Enviando alertas...';
     
-    // Enviar alertas multicanal
+    // Enviar alertas multicanal (incluye ntfy)
     await sendMultiChannelAlert(location, smartMessage);
     
     // Iniciar tracking
