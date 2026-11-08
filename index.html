@@ -134,17 +134,17 @@
         <p class="hero-desc">Un solo toque. Segundos que importan. SafeHeart avisa automáticamente a tus hijos, enfermeros o cuidadores — con tu ubicación exacta — directo desde tu reloj.</p>
        
         <div class="hero-cta">
-          <button class="btn-primary disabled" disabled>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Descargar App
-            <span class="badge-soon">Pronto</span>
-          </button>
-          <a href="app.html" class="btn-secondary">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            Probar Demo
-          </a>
-        </div>
-      </div>
+        <a href="https://drive.google.com/file/d/1IVhp9zgDY_RgF8W74KgUq5uaNOFRrqlQ/view?usp=sharing" target="_blank" class="btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar App
+        </a>
+
+  <!-- BOTÓN DE PROBAR DEMO (se queda igual) -->
+      <a href="app.html" class="btn-secondary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Probar Demo
+      </a>
+    </div>
 
       <div class="hero-right">
         <a href="app.html" class="hero-app-cta">
@@ -152,10 +152,6 @@
           Probá nuestra app
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         </a>
-        <div class="watch-status-area">
-          <div class="progress-outer"><div class="progress-inner" id="progress"></div></div>
-          <p class="status-label" id="status-subtitle">Mantené presionado para probar</p>
-        </div>
       </div>
     </div>
 
@@ -186,13 +182,25 @@
       <div class="stat-num" data-target="1">1</div>
       <div class="stat-desc">Solo un toque</div>
     </div>
-    <div class="stat-card reveal d4">
-      <div class="stat-icon-wrap">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      </div>
-      <div class="stat-num">♥</div>
-      <div class="stat-desc">Monitor cardíaco</div>
+   <div class="stat-card reveal d4 stat-ecg">
+
+    <div class="stat-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
     </div>
+    <div class="stat-content">
+        <div class="stat-num">♥</div>
+        <div class="stat-desc">Monitor cardíaco</div>
+    </div>
+    <div class="ecg-mini">
+        <svg viewBox="0 0 240 45" preserveAspectRatio="none">
+            <path class="ecg-line"
+                d="M0 23 L35 23 L45 23 L53 12 L62 34 L73 3 L84 23 L105 23 L125 23 L135 15 L145 23 L170 23 L180 23 L190 8 L200 36 L210 23 L240 23"/>
+        </svg>
+    </div>
+</div>
   </div>
 </section>
 
